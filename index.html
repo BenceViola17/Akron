@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akron Platform - Egyetemi Közösségi & Tanulási Portál</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <link href="responsive.css" rel="stylesheet">
+</head>
+<body class="theme-pe h-screen w-screen flex flex-col antialiased select-none bg-[#090d16] text-slate-100 font-sans">
+
+    <!-- TOP HEADER BAR -->
+    <header class="h-12 bg-[#090d16] border-b border-slate-800/80 flex items-center justify-between px-3 text-sm z-30 shrink-0 header-main">
+        <!-- Left: Brand & Breadcrumbs & Sidebar Toggle -->
+        <div class="header-left flex items-center space-x-3 shrink-0 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg truncate">
+            <button onclick="toggleSidebar()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors" title="Oldalsáv összecsukása / kinyitása">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+            <div class="flex items-center space-x-2 cursor-pointer shrink-0" onclick="switchMainView('chat')">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-graduation-cap text-xs"></i>
+                </div>
+                <span class="header-brand-text font-bold text-slate-100 tracking-wide text-sm hidden sm:inline">Akron</span>
+            </div>
+            <!-- Breadcrumbs Navigation -->
+            <div id="headerBreadcrumbs" class="header-breadcrumbs flex items-center space-x-1.5 text-[11px] text-slate-400 truncate">
+                <span onclick="selectUniversity(currentUni)" class="hover:text-cyan-400 cursor-pointer font-semibold text-slate-300 truncate" id="bcUni">PE</span>
+                <span>›</span>
+                <span class="hover:text-cyan-400 cursor-pointer truncate hidden md:inline" id="bcMajor">Programtervező</span>
+                <span class="hidden md:inline">›</span>
+                <span class="text-cyan-400 font-medium truncate" id="bcSection">#általános</span>
+            </div>
+        </div>
+
+        <!-- Center: View Switcher (Közösség vs Beszélgetőszoba) & Command Palette Trigger -->
+        <div class="header-center flex items-center justify-center space-x-3 flex-1 min-w-0 mx-2">
+            <!-- Stretched & Organized Segmented View Switcher -->
+            <div class="header-view-switcher flex items-center bg-[#0d1424] p-1.5 rounded-xl border border-slate-700/70 shadow-inner shrink-0">
+                <button id="btnViewChat" onclick="switchMainView('chat')" class="px-4 sm:px-5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 transition-all whitespace-nowrap bg-slate-800 text-cyan-400 shadow-sm border border-slate-700/60 cursor-pointer">
+                    <i class="fa-solid fa-comments text-xs"></i>
+                    <span class="view-tab-text">Közösség</span>
+                </button>
+                <button id="btnViewRoom" onclick="switchMainView('room')" class="px-4 sm:px-5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 transition-all whitespace-nowrap text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 cursor-pointer">
+                    <i class="fa-solid fa-headset text-emerald-400 text-xs"></i>
+                    <span class="view-tab-text">Beszélgetőszoba</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5"></span>
+                </button>
+            </div>
+
+            <!-- Stretched & Elegant Command Palette Search Pill -->
+            <button id="headerSearchBtn" onclick="openCommandPalette()" class="header-search-btn flex items-center justify-between w-60 lg:w-72 xl:w-80 bg-[#0d1424] hover:bg-[#11192e] border border-slate-700/70 hover:border-slate-600 px-4 py-2 rounded-xl text-xs text-slate-400 transition-all shadow-inner group cursor-pointer shrink-0" title="Gyorskeresés & Parancsok (Ctrl+K)">
+                <div class="header-search-content flex items-center space-x-2.5 truncate">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500 group-hover:text-cyan-400 text-xs transition-colors header-search-icon"></i>
+                    <span class="header-search-text truncate text-slate-400 group-hover:text-slate-200">Gyorskeresés & Parancsok...</span>
+                </div>
+                <kbd class="header-search-kbd px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-400 rounded-md border border-slate-700 shadow-sm shrink-0">Ctrl+K</kbd>
+            </button>
+        </div>
+
+        <!-- Right Controls (Kanban, Export, Neptun Status, Notifications) -->
+        <div class="header-right flex items-center space-x-2.5 shrink-0">
+            <!-- Kanban & Deadlines Button -->
+            <button id="headerKanbanBtn" onclick="openKanbanModal()" class="px-2.5 py-1.5 bg-[#131b2e] hover:bg-[#1a253e] text-slate-300 hover:text-white text-xs rounded-lg border border-slate-700/60 flex items-center space-x-1.5 transition-colors cursor-pointer" title="Tanulmányi Határidők & Kanban Tábla">
+                <i class="fa-solid fa-list-check text-amber-400"></i>
+                <span class="hidden xl:inline kanban-btn-text">Határidők & Kanban</span>
+            </button>
+
+            <!-- Export Menu -->
+            <div class="relative header-export-wrapper">
+                <button id="btnExport" onclick="toggleExportMenu(event)" class="px-2.5 py-1.5 bg-[#131b2e] hover:bg-[#1a253e] text-slate-300 text-xs rounded-lg border border-slate-700/60 flex items-center space-x-2 transition-all cursor-pointer">
+                    <i class="fa-solid fa-file-export text-slate-400"></i>
+                    <span class="hidden md:inline export-btn-text">Export</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i>
+                </button>
+                <div id="exportMenu" class="hidden absolute right-0 mt-2 w-52 bg-[#0f172a] border border-slate-800 rounded-xl shadow-2xl py-2 z-50 text-xs">
+                    <button onclick="exportProject('pdf')" class="w-full text-left px-3 py-2 hover:bg-slate-800 flex items-center space-x-2.5 text-slate-200 transition-colors">
+                        <i class="fa-solid fa-file-pdf text-red-400"></i>
+                        <span>Jegyzetek exportálása (PDF)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Neptun Status Badge (Clickable modal opener) -->
+            <button id="neptunBadge" onclick="openNeptunModal()" title="Kattints a részletes Neptun tanulmányi adatokhoz" class="flex items-center bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-600/40 px-2.5 py-1 rounded-full text-emerald-400 text-xs font-medium space-x-1.5 transition-all cursor-pointer">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="neptun-full-text hidden sm:inline">Neptun csatlakoztatva</span>
+                <span class="neptun-short-text sm:hidden">Neptun</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70 ml-0.5"></i>
+            </button>
+
+            <!-- Notification Bell -->
+            <div class="relative header-notif-wrapper">
+                <button id="btnNotifications" onclick="toggleNotifications(event)" class="relative p-1.5 text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="unreadNotificationBadge" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+
+                <!-- Notifications Popover -->
+                <div id="notificationsPopover" class="hidden absolute right-0 mt-2 w-80 bg-[#0f172a] border border-slate-800 rounded-xl shadow-2xl p-3 z-50 text-xs">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+                        <span class="font-bold text-slate-200">Értesítések</span>
+                        <button onclick="markAllNotificationsRead()" class="text-[11px] text-cyan-400 hover:underline">Mind olvasott</button>
+                    </div>
+                    <div id="notificationList" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- FAR-LEFT RAIL: UNIVERSITIES & TOOLS -->
+        <aside class="w-16 bg-[#060a12] border-r border-slate-800/80 flex flex-col items-center py-3 space-y-3 z-20 shrink-0">
+            <!-- Akron Brand Home Button -->
+            <button onclick="switchMainView('chat')" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white flex items-center justify-center font-bold shadow-lg hover:rounded-xl transition-all group relative">
+                <i class="fa-solid fa-graduation-cap text-lg"></i>
+                <span class="absolute left-16 bg-slate-900 text-slate-200 text-xs font-semibold px-2 py-1 rounded-md shadow-xl whitespace-nowrap hidden group-hover:block z-50">Akron Főoldal</span>
+            </button>
+
+            <div class="w-8 h-[1px] bg-slate-800/80 my-1"></div>
+
+            <!-- University List (Scrollable) -->
+            <div id="uniListContainer" class="flex-1 overflow-y-auto space-y-2.5 w-full flex flex-col items-center no-scrollbar">
+                <!-- University buttons populated dynamically by JS -->
+            </div>
+
+            <div class="w-8 h-[1px] bg-slate-800/80 my-1"></div>
+            <!-- BESZÉLGETŐSZOBA SWITCHER BUTTON IN RAIL -->
+            <button id="railBtnRoom" onclick="switchMainView('room')" class="w-10 h-10 rounded-2xl bg-slate-800 hover:bg-emerald-600 text-emerald-400 hover:text-white flex items-center justify-center transition-all relative group shadow-md" title="Beszélgetőszoba">
+                <i class="fa-solid fa-headset text-base"></i>
+                <span class="absolute left-16 bg-slate-900 text-slate-200 text-xs font-semibold px-2 py-1 rounded-md shadow-xl whitespace-nowrap hidden group-hover:block z-50">Beszélgetőszoba & Hívás</span>
+            </button>
+
+        </aside>
+
+        <!-- SECONDARY SIDEBAR: CHANNELS, ROOMS & MAJOR SELECTOR -->
+        <aside id="channelSidebar" class="w-64 bg-[#0a0f1d] border-r border-slate-800/80 flex flex-col justify-between shrink-0 transition-all duration-200">
+            <div class="p-3 overflow-y-auto flex-1">
+                <!-- Selected University Title & Major -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between text-slate-100 font-bold text-sm mb-2 px-1">
+                        <span id="currentUniTitle" class="flex items-center gap-2 truncate">
+                            <i class="fa-solid fa-building-columns text-cyan-400"></i>
+                            Pannon Egyetem (PE)
+                        </span>
+                    </div>
+
+                    <label class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase px-1">Kiválasztott Szak</label>
+                    <select id="majorSelect" onchange="changeMajor(this.value)" class="w-full bg-[#111827] text-xs text-slate-200 border border-slate-700/80 rounded-lg p-2 mt-1 focus:outline-none focus:border-cyan-500">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <!-- Channels, Voice Rooms & Labs List -->
+                <div class="space-y-4">
+                    <!-- Közösségi Csatornák -->
+                    <div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 tracking-wider uppercase px-1 mb-1">
+                            <span>Közösségi Csatornák</span>
+                            <i class="fa-solid fa-plus hover:text-cyan-400 cursor-pointer text-xs transition-colors" onclick="openAddChannelModal()" title="Új csatorna létrehozása"></i>
+                        </div>
+                        <div id="channelsContainer" class="space-y-0.5">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Beszélgetőszobák (Voice & Study Rooms) -->
+                    <div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 tracking-wider uppercase px-1 mb-1">
+                            <span>Beszélgetőszobák (Voice)</span>
+                            <i class="fa-solid fa-plus hover:text-emerald-400 cursor-pointer text-xs transition-colors" onclick="openCreateRoomModal()" title="Új szoba létrehozása"></i>
+                        </div>
+                        <div id="voiceRoomsContainer" class="space-y-0.5">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Current User -->
+                    <div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 tracking-wider uppercase px-1 mb-1">
+                            <span>Jelenlévők</span>
+                            <span id="onlineMembersCount" class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full text-[10px]">1</span>
+                        </div>
+                        <div id="studentListContainer" class="space-y-1">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Voice Connection Status Widget -->
+            <div id="voiceStatusWidget" class="hidden p-2.5 bg-emerald-950/70 border-t border-emerald-600/40 flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 truncate cursor-pointer" onclick="switchMainView('room')">
+                    <span class="relative flex h-2.5 w-2.5 shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <div class="truncate">
+                        <div id="voiceStatusRoomName" class="text-emerald-300 font-semibold truncate text-[11px]">Algoritmusok Tanulószoba</div>
+                        <div class="text-[9px] text-emerald-400/80 font-mono">Hangkapcsolat aktív • 24ms</div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0">
+                    <button onclick="toggleVoiceMute()" id="btnQuickMute" class="p-1.5 text-slate-300 hover:text-white rounded bg-slate-800/80 transition-colors" title="Mikrofon ki/be">
+                        <i id="quickMuteIcon" class="fa-solid fa-microphone text-xs text-emerald-400"></i>
+                    </button>
+                    <button onclick="leaveVoiceRoom()" class="p-1.5 text-red-300 hover:text-white rounded bg-red-900/60 transition-colors" title="Kapcsolat bontása">
+                        <i class="fa-solid fa-phone-slash text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Widget -->
+            <div class="p-3 bg-[#080c17] border-t border-slate-800/80 flex items-center justify-between">
+                <div class="flex items-center space-x-2 cursor-pointer group" onclick="openStudentModal(userName)" title="Kattints a saját profilod megtekintéséhez">
+                    <div id="profileUserInitial" class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center font-bold text-xs text-white shadow group-hover:scale-105 transition-transform">B</div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-200 group-hover:text-cyan-400 flex items-center gap-1 transition-colors">
+                            <span id="profileUserName">Bence</span>
+                            <i class="fa-solid fa-circle-check text-cyan-400 text-[10px]" title="Hitelesített hallgató"></i>
+                        </div>
+                        <div id="profileNeptunCode" class="text-[10px] text-slate-500">NEPTUN: HS3333</div>
+                    </div>
+                </div>
+                <button onclick="openSettingsModal()" class="text-slate-400 hover:text-cyan-400 text-xs p-1.5 rounded-lg hover:bg-slate-800 transition-colors" title="Beállítások">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- VIEW 1: CHAT / COMMUNITY VIEW -->
+        <main id="chatView" class="flex-1 flex flex-col bg-[#0b101d] overflow-hidden">
+            <!-- Channel Header -->
+            <div class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-[#0a0f1d] shrink-0">
+                <div class="flex items-center space-x-2">
+                    <i id="channelHeaderIcon" class="fa-solid fa-hashtag text-slate-400 text-lg"></i>
+                    <span id="channelTitle" class="font-bold text-slate-100 text-sm">általános</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="channelDescription" class="text-xs text-slate-400">Közösségi beszélgetések és információk</span>
+                </div>
+                <div class="flex items-center space-x-3 text-slate-400 text-sm">
+                    <button onclick="toggleMembersList()" class="hover:text-cyan-400 p-1.5 transition-colors" title="Felhasználók listája">
+                        <i class="fa-solid fa-users"></i>
+                    </button>
+                    <button onclick="togglePinnedMessages()" class="hover:text-amber-400 p-1.5 transition-colors" title="Kitűzött üzenetek">
+                        <i class="fa-solid fa-thumbtack"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Content area + Members Slide-in -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Messages List -->
+                <div id="chatMessagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Right Members Drawer (Toggleable) -->
+                <aside id="membersDrawer" class="hidden w-56 bg-[#0a0f1d] border-l border-slate-800/80 p-3 flex flex-col shrink-0 text-xs animate-fade-in">
+                    <div class="font-bold text-slate-300 pb-2 border-b border-slate-800 mb-2 flex justify-between items-center">
+                        <span>Csatorna Tagjai</span>
+                        <button onclick="toggleMembersList()" class="text-slate-500 hover:text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="drawerMemberList" class="space-y-2 overflow-y-auto flex-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Chat Input Box -->
+            <div class="p-4 bg-[#0a0f1d] border-t border-slate-800/80 shrink-0">
+                <div class="bg-[#111728] border border-slate-800 rounded-xl p-2 flex items-center space-x-2">
+                    <button onclick="openCodeSnippetModal()" class="text-slate-400 hover:text-cyan-400 px-2 transition-colors" title="Kódrészlet csatolása">
+                        <i class="fa-solid fa-code"></i>
+                    </button>
+                    <input id="chatInput" type="text" onkeydown="handleChatKey(event)" placeholder="Üzenet küldése ide: #általános..." class="bg-transparent flex-1 text-xs text-slate-200 focus:outline-none">
+                    <button onclick="sendChatMessage()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center space-x-1.5 transition-all shadow">
+                        <span>Küldés</span>
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW 2: DEDICATED BESZÉLGETŐSZOBA (VOICE & VIDEO STUDY ROOM) -->
+        <main id="roomView" class="hidden flex-1 flex flex-col bg-[#070c18] overflow-hidden">
+            <section id="roomLobbyView" class="flex-1 overflow-y-auto p-6 sm:p-10">
+                <div class="max-w-5xl mx-auto">
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-headset"></i>
+                            Beszélgetőszobák
+                        </div>
+                        <h1 class="text-2xl font-bold text-slate-100">Válassz egy szobát</h1>
+                        <p class="text-sm text-slate-400 mt-2">A szoba kiválasztása után még megerősítheted a belépést.</p>
+                    </div>
+                    <div id="roomLobbyCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <!-- Room choices are rendered dynamically by app.js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Room Top Bar with Pomodoro Timer -->
+            <div id="roomSessionHeader" class="hidden h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-[#0a0f1d] shrink-0">
+                <div class="flex items-center space-x-3 truncate">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="truncate">
+                        <div class="flex items-center space-x-2">
+                            <span id="activeRoomTitle" class="font-bold text-slate-100 text-sm truncate">Algoritmusok Tanulószoba</span>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-600/40 text-[10px] font-bold flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                ÉLŐ
+                            </span>
+                        </div>
+                        <div id="activeRoomDesc" class="text-[11px] text-slate-400 truncate hidden sm:block">Közös tanulás és konzultáció</div>
+                    </div>
+                </div>
+
+                <!-- Center Pomodoro Timer Widget in Room -->
+                <div class="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1 rounded-xl text-xs shadow-inner">
+                    <span class="text-red-400 font-bold flex items-center gap-1">
+                        🍅 <span id="pomodoroTimerDisplay" class="font-mono text-slate-100 font-bold">25:00</span>
+                    </span>
+                    <span id="pomodoroModeLabel" class="text-[10px] text-slate-400 hidden md:inline">Fókusz</span>
+                    <button onclick="togglePomodoro()" id="btnPomodoroPlay" class="hover:text-emerald-400 p-0.5 transition-colors" title="Indítás / Szünet">
+                        <i id="pomodoroIcon" class="fa-solid fa-play text-[11px]"></i>
+                    </button>
+                    <button onclick="resetPomodoro()" class="hover:text-slate-200 p-0.5 transition-colors" title="Időzítő visszaállítása">
+                        <i class="fa-solid fa-rotate-right text-[10px]"></i>
+                    </button>
+                    <button onclick="switchPomodoroMode()" class="hover:text-cyan-400 p-0.5 text-[10px] text-slate-400 hidden sm:inline" title="Mód váltása (Fókusz / Szünet)">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                </div>
+
+                <!-- Right Room Controls -->
+                <div class="flex items-center space-x-2 shrink-0">
+                    <!-- Room Switcher Dropdown Button -->
+                    <select id="roomSelectDropdown" onchange="requestJoinVoiceRoom(this.value)" class="bg-[#111827] text-xs text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-cyan-500 hidden sm:block">
+                        <!-- Populated by JS -->
+                    </select>
+
+                    <button id="btnToggleWhiteboard" onclick="toggleRoomNotes()" class="px-2.5 py-1.5 bg-[#131b2e] hover:bg-[#1a253e] text-slate-300 text-xs rounded-lg border border-slate-700/60 flex items-center space-x-1.5 transition-colors" title="Közös rajztábla és jegyzetek megnyitása">
+                        <i class="fa-solid fa-pen-nib text-cyan-400"></i>
+                        <span class="hidden md:inline">Rajztábla</span>
+                    </button>
+                    <button id="btnToggleRoomChat" onclick="toggleRoomChatDrawer()" class="px-2.5 py-1.5 bg-[#131b2e] hover:bg-[#1a253e] text-slate-300 text-xs rounded-lg border border-slate-700/60 flex items-center space-x-1.5 transition-colors" title="Szoba csevegőablak">
+                        <i class="fa-solid fa-comments text-blue-400"></i>
+                        <span class="hidden md:inline">Szoba Chat</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stage Area (Participants Grid + Optional Whiteboard + Optional Chat) -->
+            <div id="roomSessionStage" class="hidden flex-1 flex overflow-hidden p-4 space-x-3">
+                <!-- Conference Video/Participant Grid — populated dynamically by renderRoomParticipantGrid() in app.js -->
+                <div id="roomMainStage" class="flex-1 flex flex-col justify-center overflow-hidden">
+                    <div id="roomGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full max-h-[640px]">
+                        <!-- Tiles rendered dynamically by JS based on which participants are in this room -->
+                    </div>
+                </div>
+
+                <!-- Collaborative Whiteboard & Notes Panel (Toggleable) -->
+                <div id="roomNotesPanel" class="hidden w-80 lg:w-96 bg-[#0f172a] border border-slate-800 rounded-2xl p-3 flex flex-col shadow-2xl animate-fade-in shrink-0">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
+                        <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-nib text-cyan-400"></i>
+                            Közös Rajztábla & Jegyzet
+                        </span>
+                        <button onclick="toggleRoomNotes()" class="text-slate-500 hover:text-slate-300 text-xs p-1"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <!-- Whiteboard Canvas -->
+                    <div class="relative bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden mb-2">
+                        <canvas id="whiteboardCanvas" width="350" height="200" class="w-full h-44 cursor-crosshair"></canvas>
+                        <div class="absolute bottom-1 left-2 right-2 flex justify-between items-center text-[10px]">
+                            <div class="flex items-center space-x-1.5 bg-slate-900/90 px-2 py-0.5 rounded-lg border border-slate-800">
+                                <button onclick="setCanvasColor('#22d3ee')" class="w-3.5 h-3.5 rounded-full bg-cyan-400"></button>
+                                <button onclick="setCanvasColor('#10b981')" class="w-3.5 h-3.5 rounded-full bg-emerald-400"></button>
+                                <button onclick="setCanvasColor('#f59e0b')" class="w-3.5 h-3.5 rounded-full bg-amber-400"></button>
+                                <button onclick="setCanvasColor('#ffffff')" class="w-3.5 h-3.5 rounded-full bg-white"></button>
+                            </div>
+                            <button onclick="clearWhiteboard()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Törlés</button>
+                        </div>
+                    </div>
+
+                    <!-- Shared Realtime Notes -->
+                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Közös Jegyzetfüzet (Valós idejű)</label>
+                    <textarea id="roomSharedNotes" rows="6" oninput="syncRoomNotes(this.value)" placeholder="Írj ide közös képleteket, feladat lépéseket, algoritmus vázlatot..." class="flex-1 bg-[#111828] border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono resize-none"></textarea>
+                </div>
+
+                <!-- In-Call Chat Drawer (Toggleable) -->
+                <div id="roomChatDrawer" class="hidden w-80 bg-[#0f172a] border border-slate-800 rounded-2xl p-3 flex flex-col shadow-2xl animate-fade-in shrink-0">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
+                        <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-comments text-blue-400"></i>
+                            Szoba Csevegés
+                        </span>
+                        <button onclick="toggleRoomChatDrawer()" class="text-slate-500 hover:text-slate-300 text-xs p-1"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <!-- Room Chat Messages List -->
+                    <div id="roomChatMessagesList" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1 mb-2">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Room Chat Input -->
+                    <div class="flex items-center space-x-1.5 pt-2 border-t border-slate-800">
+                        <input id="roomChatInput" type="text" onkeydown="handleRoomChatKey(event)" placeholder="Üzenet a szobának..." class="flex-1 bg-[#111828] border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <button onclick="sendRoomChatMessage()" class="p-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Floating Call Controls Dock -->
+            <div id="roomSessionFooter" class="hidden h-16 bg-[#090d16] border-t border-slate-800/80 flex items-center justify-between px-6 shrink-0">
+                <!-- Left Info -->
+                <div class="flex items-center space-x-2 text-xs text-slate-400 w-48 hidden sm:flex">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="dockConnectionStatus">Kapcsolat: Kiváló (24ms)</span>
+                </div>
+
+                <!-- Center Controls (Mute, Camera, Screen, Hand, Notes, Chat, Leave) -->
+                <div class="flex items-center space-x-2.5">
+                    <!-- Toggle Microphone -->
+                    <button id="btnToggleMic" onclick="toggleVoiceMute()" class="w-11 h-11 rounded-2xl bg-slate-800 hover:bg-slate-700 text-emerald-400 flex items-center justify-center transition-all shadow-md group relative">
+                        <i id="micIconMain" class="fa-solid fa-microphone text-base"></i>
+                        <span class="absolute -top-8 bg-slate-900 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded shadow whitespace-nowrap hidden group-hover:block">Mikrofon</span>
+                    </button>
+
+                    <!-- Toggle Camera -->
+                    <button id="btnToggleCamera" onclick="toggleVoiceCamera()" class="w-11 h-11 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-md group relative">
+                        <i id="camIconMain" class="fa-solid fa-video-slash text-base"></i>
+                        <span class="absolute -top-8 bg-slate-900 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded shadow whitespace-nowrap hidden group-hover:block">Kamera</span>
+                    </button>
+
+                    <!-- Toggle Screen Share -->
+                    <button id="btnToggleScreen" onclick="toggleScreenShare()" class="w-11 h-11 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-md group relative">
+                        <i id="screenIconMain" class="fa-solid fa-desktop text-base"></i>
+                        <span class="absolute -top-8 bg-slate-900 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded shadow whitespace-nowrap hidden group-hover:block">Képernyőmegosztás</span>
+                    </button>
+
+                    <!-- Raise Hand -->
+                    <button id="btnRaiseHand" onclick="raiseHand()" class="w-11 h-11 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 flex items-center justify-center transition-all shadow-md group relative">
+                        <i class="fa-solid fa-hand text-base"></i>
+                        <span class="absolute -top-8 bg-slate-900 text-slate-200 text-[10px] font-semibold px-2 py-0.5 rounded shadow whitespace-nowrap hidden group-hover:block">Kézfelemelés</span>
+                    </button>
+
+                    <!-- Leave Voice Room -->
+                    <button id="btnLeaveRoom" onclick="leaveVoiceRoom()" class="px-5 h-11 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-semibold flex items-center space-x-2 transition-all shadow-lg hover:shadow-red-600/30">
+                        <i class="fa-solid fa-phone-slash text-sm"></i>
+                        <span class="text-xs">Kilépés</span>
+                    </button>
+                </div>
+
+                <!-- Right Quick Controls -->
+                <div class="flex items-center space-x-2 w-48 justify-end">
+                    <button onclick="switchMainView('chat')" class="px-3 py-1.5 bg-[#131b2e] hover:bg-slate-800 text-slate-300 hover:text-white text-xs rounded-xl border border-slate-700/60 transition-colors">
+                        <i class="fa-solid fa-comments mr-1"></i> Fő Chat
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: CONFIRM ROOM JOIN -->
+    <div id="joinRoomConfirmModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-fade-in">
+            <div class="flex items-start gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-600/40 text-emerald-400 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-100">Belépés a szobába?</h2>
+                    <p class="text-xs text-slate-400 mt-1">Biztosan csatlakozni szeretnél ehhez a beszélgetőszobához?</p>
+                </div>
+            </div>
+            <div class="bg-[#111828] border border-slate-800 rounded-xl p-3 mb-5">
+                <div id="joinRoomConfirmName" class="text-sm font-semibold text-emerald-300"></div>
+                <div id="joinRoomConfirmDescription" class="text-xs text-slate-400 mt-1"></div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="cancelJoinVoiceRoom()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">Nem</button>
+                <button type="button" onclick="confirmJoinVoiceRoom()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow">Igen, belépek</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: COMMAND PALETTE (Ctrl+K) -->
+    <div id="commandPaletteModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center pt-20 p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden animate-fade-in flex flex-col max-h-[75vh]">
+            <!-- Palette Search Header -->
+            <div class="p-3 border-b border-slate-800 flex items-center space-x-3 bg-[#131b2e]">
+                <i class="fa-solid fa-terminal text-cyan-400 text-sm"></i>
+                <input id="paletteInput" type="text" oninput="handlePaletteSearch(this.value)" onkeydown="handlePaletteKey(event)" placeholder="Írj be egy parancsot, fájlt, szobát vagy egyetemet..." class="bg-transparent flex-1 text-sm text-slate-100 focus:outline-none placeholder-slate-500 font-mono text-xs">
+                <span class="text-[10px] text-slate-500 border border-slate-700 px-1.5 py-0.5 rounded font-mono">ESC</span>
+            </div>
+            <!-- Palette Results List -->
+            <div id="paletteResultsList" class="flex-1 overflow-y-auto divide-y divide-slate-800/60 p-2 text-xs space-y-0.5">
+                <!-- Populated dynamically -->
+            </div>
+            <!-- Palette Footer -->
+            <div class="p-2 bg-[#090d16] border-t border-slate-800 text-[10px] text-slate-500 flex justify-between items-center px-4">
+                <div class="flex items-center space-x-3">
+                    <span><kbd class="bg-slate-800 px-1 rounded">↑</kbd> <kbd class="bg-slate-800 px-1 rounded">↓</kbd> Navigáció</span>
+                    <span><kbd class="bg-slate-800 px-1.5 rounded">Enter</kbd> Futtatás</span>
+                </div>
+                <span>Akron Command Palette</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: KANBAN & STUDY DEADLINES -->
+    <div id="kanbanModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-5xl p-6 shadow-2xl animate-fade-in flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-950/80 border border-amber-600/40 text-amber-400 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-100 text-sm">Tanulmányi Határidők & Kanban Feladatkezelő</h3>
+                        <div class="text-[11px] text-slate-400">Neptun szinkronizált teendők, beadandók és vizsgák</div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openAddTaskModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Új Feladat</span>
+                    </button>
+                    <button onclick="closeModal('kanbanModal')" class="text-slate-400 hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+                </div>
+            </div>
+
+            <!-- Kanban Board 3-column Grid -->
+            <div id="kanbanColumns" class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto pr-1">
+                <!-- Column 1: Teendő -->
+                <div class="bg-[#0b101d] rounded-xl border border-slate-800 p-3 flex flex-col">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <span class="font-bold text-slate-300 text-xs flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                            Teendő (To-Do)
+                        </span>
+                        <span id="kanbanCountTodo" class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full text-[10px] font-bold">2</span>
+                    </div>
+                    <div id="kanbanColTodo" class="space-y-2 flex-1 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Column 2: Folyamatban -->
+                <div class="bg-[#0b101d] rounded-xl border border-slate-800 p-3 flex flex-col">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <span class="font-bold text-slate-300 text-xs flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                            Folyamatban (In Progress)
+                        </span>
+                        <span id="kanbanCountProgress" class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full text-[10px] font-bold">1</span>
+                    </div>
+                    <div id="kanbanColProgress" class="space-y-2 flex-1 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Column 3: Leadva / Kész -->
+                <div class="bg-[#0b101d] rounded-xl border border-slate-800 p-3 flex flex-col">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                        <span class="font-bold text-slate-300 text-xs flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            Leadva / Kész (Done)
+                        </span>
+                        <span id="kanbanCountDone" class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full text-[10px] font-bold">1</span>
+                    </div>
+                    <div id="kanbanColDone" class="space-y-2 flex-1 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD KANBAN TASK -->
+    <div id="addTaskModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2 text-xs">
+                    <i class="fa-solid fa-plus text-amber-400"></i>
+                    Új Tanulmányi Feladat
+                </h3>
+                <button onclick="closeModal('addTaskModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitAddTask(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Feladat Neve</label>
+                    <input id="inputTaskTitle" type="text" required placeholder="pl. Algoritmusok 2. Kis ZH felkészülés" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Tantárgy</label>
+                    <input id="inputTaskCourse" type="text" placeholder="pl. Algoritmusok és adatszerkezetek" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Határidő</label>
+                    <input id="inputTaskDeadline" type="text" placeholder="pl. 3 nap múlva (2026. okt. 17.)" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Prioritás</label>
+                    <select id="inputTaskPriority" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-amber-500">
+                        <option value="high">Magas (ZH / Beadandó)</option>
+                        <option value="medium" selected>Normál (Gyakorló feladat)</option>
+                        <option value="low">Alacsony (Ajánlott olvasmány)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('addTaskModal')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Mégse</button>
+                    <button type="submit" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-lg shadow">Mentés</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD CHANNEL -->
+    <div id="addChannelModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-hashtag text-cyan-400"></i>
+                    Új Csatorna Létrehozása
+                </h3>
+                <button onclick="closeModal('addChannelModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitAddChannel(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Csatorna Neve (kisbetűk, kötőjel)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-500">#</span>
+                        <input id="inputChannelName" type="text" required placeholder="pl. zh-felkeszules" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 pl-7 text-slate-100 focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Csatorna Leírása / Célja</label>
+                    <input id="inputChannelDesc" type="text" placeholder="pl. Kérdések és mintamegoldások a félévközi ZH-ra" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('addChannelModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Mégse</button>
+                    <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg shadow">Létrehozás</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE VOICE ROOM -->
+    <div id="createRoomModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-headset text-emerald-400"></i>
+                    Új Beszélgetőszoba Létrehozása
+                </h3>
+                <button onclick="closeModal('createRoomModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitCreateRoom(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Szoba Neve</label>
+                    <input id="inputRoomName" type="text" required placeholder="pl. Algoritmusok ZH Felkészülés" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Típus / Kategória</label>
+                    <select id="inputRoomType" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+                        <option value="study">Tanulószoba (Hang + Videó + Képernyőmegosztás)</option>
+                        <option value="pomodoro">Csendes Pomodoro Szoba (Kamera + Zene)</option>
+                        <option value="lounge">Kötetlen Kávézó & Diák Chill</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Téma / Leírás</label>
+                    <input id="inputRoomDesc" type="text" placeholder="pl. Kérdések megbeszélése és kódolás közösen" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('createRoomModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Mégse</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg shadow">Létrehozás & Belépés</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: NEPTUN STUDY SYSTEM -->
+    <div id="neptunModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-2xl p-6 shadow-2xl animate-fade-in flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-950 border border-emerald-600/40 text-emerald-400 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-100 text-sm">Neptun Egységes Tanulmányi Rendszer</h3>
+                        <div class="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Kapcsolat aktív: HS3333 hallgató
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeModal('neptunModal')" class="text-slate-400 hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+
+            <!-- Neptun Student Header Details -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                <div class="bg-[#141d33] p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block">Hallgató</span>
+                    <span id="neptunStudentName" class="font-semibold text-slate-200">Bence</span>
+                </div>
+                <div class="bg-[#141d33] p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block">Neptun kód</span>
+                    <span id="neptunStudentCode" class="font-mono font-semibold text-cyan-400">HS3333</span>
+                </div>
+                <div class="bg-[#141d33] p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block">Ösztöndíjindex (KKI)</span>
+                    <span class="font-bold text-emerald-400">4.82</span>
+                </div>
+                <div class="bg-[#141d33] p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block">Kreditek</span>
+                    <span class="font-semibold text-slate-200">142 / 180 (78%)</span>
+                </div>
+            </div>
+
+            <!-- Current Courses List -->
+            <div class="flex-1 overflow-y-auto text-xs space-y-2 pr-1">
+                <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] px-1">Aktuális Félév Tárgyai & Eredmények</div>
+                <div class="bg-[#111828] rounded-xl border border-slate-800/80 divide-y divide-slate-800">
+                    <div class="p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-slate-200">Algoritmusok és adatszerkezetek</div>
+                            <div class="text-[11px] text-slate-400">Oktató • 5 Kredit</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-bold">Jeles (5)</span>
+                        </div>
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-slate-200">Webfejlesztés és kliensoldali technológiák</div>
+                            <div class="text-[11px] text-slate-400">Oktató • 4 Kredit</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-bold">Jeles (5)</span>
+                        </div>
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-slate-200">Szoftvertervezés és architektúrák</div>
+                            <div class="text-[11px] text-slate-400">Oktató • 5 Kredit</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/60 font-medium">Labor leadva (4)</span>
+                        </div>
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-slate-200">Operációs rendszerek és hálózatok</div>
+                            <div class="text-[11px] text-slate-400">Oktató • 5 Kredit</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-bold">Jeles (5)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-slate-800 mt-3 text-xs">
+                <span class="text-slate-500">Szinkronizálva: Épp most</span>
+                <button onclick="closeModal('neptunModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors">Bezárás</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SETTINGS -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-cyan-400"></i>
+                    Felhasználói & Rendszer Beállítások
+                </h3>
+                <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitSettings(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Megjelenítendő Név</label>
+                    <input id="inputSettingName" type="text" value="Bence" required class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Neptun Kód</label>
+                    <input id="inputSettingNeptun" type="text" value="HS3333" required maxlength="6" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 uppercase focus:outline-none focus:border-cyan-500 font-mono">
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-slate-400">Értesítések hanggal</span>
+                    <input id="inputSettingSound" type="checkbox" checked class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('settingsModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Mégse</button>
+                    <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg shadow">Mentés</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CURRENT USER PROFILE -->
+    <div id="studentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-user-graduate text-cyan-400"></i>
+                    <span id="studentModalTitle">Saját profilod</span>
+                </h3>
+                <button onclick="closeModal('studentModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex items-center space-x-4 mb-4">
+                <div id="studentAvatar" class="w-12 h-12 rounded-2xl bg-cyan-600 flex items-center justify-center font-bold text-base text-white shadow-lg">B</div>
+                <div>
+                    <h4 id="studentModalName" class="font-bold text-slate-100 text-sm">Bence</h4>
+                    <span id="studentModalRole" class="text-xs text-slate-400">Saját profil • Online</span>
+                    <div class="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
+                        <span id="studentModalStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span> <span id="studentModalStatusText">Online az Akronon</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#111828] p-3 rounded-xl border border-slate-800 mb-4 text-xs space-y-1.5">
+                <div class="flex justify-between text-slate-300">
+                    <span class="text-slate-400">Egyetem:</span>
+                    <span id="studentModalUni">Pannon Egyetem (PE)</span>
+                </div>
+                <div class="flex justify-between text-slate-300">
+                    <span class="text-slate-400">Készségek:</span>
+                    <span id="studentModalSkills" class="text-cyan-400 font-mono">C/C++, Webfejlesztés, Python</span>
+                </div>
+                <div class="flex justify-between text-slate-300">
+                    <span class="text-slate-400">Badge:</span>
+                    <span id="studentModalBadge" class="text-amber-400">Saját fiók</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SHARE CODE SNIPPET IN CHAT -->
+    <div id="codeSnippetModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-code text-cyan-400"></i>
+                    Kódrészlet Megosztása a Chatben
+                </h3>
+                <button onclick="closeModal('codeSnippetModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitCodeSnippet(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Programozási Nyelv</label>
+                    <select id="snippetLanguage" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-cyan-500">
+                        <option value="c">C / C++</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="python">Python</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Kód tartalma</label>
+                    <textarea id="snippetCode" rows="6" required placeholder="// Másold be a kódot ide..." class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-xs focus:outline-none focus:border-cyan-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Megjegyzés / Kérdés</label>
+                    <input id="snippetComment" type="text" placeholder="pl. Mit gondoltok erről a rendező algoritmusról?" class="w-full bg-[#182238] border border-slate-700 rounded-lg p-2 text-slate-100 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('codeSnippetModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Mégse</button>
+                    <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg shadow">Megosztás</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PINNED MESSAGES -->
+    <div id="pinnedModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-thumbtack text-amber-400"></i>
+                    Kitűzött Üzenetek és Határidők
+                </h3>
+                <button onclick="closeModal('pinnedModal')" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs max-h-80 overflow-y-auto">
+                <div class="bg-[#111828] p-3 rounded-xl border border-amber-500/30 space-y-1">
+                    <div class="flex items-center justify-between text-amber-400 font-bold">
+                        <span>📌 Algoritmusok Házi Feladat 1. Specifikáció</span>
+                        <span class="text-[10px] text-slate-400">2026. okt. 25.</span>
+                    </div>
+                    <p class="text-slate-300">A feladat a bináris keresőfa és a quicksort implementálása C nyelven, memóriaszivárgás nélkül.</p>
+                </div>
+                <div class="bg-[#111828] p-3 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex items-center justify-between text-cyan-400 font-bold">
+                        <span>📌 Heti Demonstrátori Konzultáció</span>
+                        <span class="text-[10px] text-slate-400">Minden csütörtök 16:00</span>
+                    </div>
+                    <p class="text-slate-300">Helyszín: I. Épület 104-es labor vagy online a megadott Teams csoportban. Kérdésekkel bátran keressétek a demonstrátort!</p>
+                </div>
+            </div>
+            <div class="flex justify-end pt-4 border-t border-slate-800 mt-3">
+                <button onclick="closeModal('pinnedModal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs">Bezárás</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none">
+        <!-- Toast items injected here -->
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+
+:root {
+    --uni-primary: #06b6d4;
+    --uni-primary-hover: #0891b2;
+    --uni-bg: rgba(6, 182, 212, 0.15);
+    --uni-border: rgba(6, 182, 212, 0.4);
+    --uni-glow: rgba(6, 182, 212, 0.45);
+}
+
+body.theme-pe {
+    --uni-primary: #06b6d4;
+    --uni-primary-hover: #0891b2;
+    --uni-bg: rgba(6, 182, 212, 0.15);
+    --uni-border: rgba(6, 182, 212, 0.4);
+    --uni-glow: rgba(6, 182, 212, 0.45);
+}
+
+body.theme-bme {
+    --uni-primary: #f43f5e;
+    --uni-primary-hover: #e11d48;
+    --uni-bg: rgba(244, 63, 94, 0.15);
+    --uni-border: rgba(244, 63, 94, 0.4);
+    --uni-glow: rgba(244, 63, 94, 0.45);
+}
+
+body.theme-elte {
+    --uni-primary: #818cf8;
+    --uni-primary-hover: #6366f1;
+    --uni-bg: rgba(129, 140, 248, 0.15);
+    --uni-border: rgba(129, 140, 248, 0.4);
+    --uni-glow: rgba(129, 140, 248, 0.45);
+}
+
+body.theme-sze {
+    --uni-primary: #f59e0b;
+    --uni-primary-hover: #d97706;
+    --uni-bg: rgba(245, 158, 11, 0.15);
+    --uni-border: rgba(245, 158, 11, 0.4);
+    --uni-glow: rgba(245, 158, 11, 0.45);
+}
+
+body.theme-de {
+    --uni-primary: #10b981;
+    --uni-primary-hover: #059669;
+    --uni-bg: rgba(16, 185, 129, 0.15);
+    --uni-border: rgba(16, 185, 129, 0.4);
+    --uni-glow: rgba(16, 185, 129, 0.45);
+}
+
+body.theme-pte {
+    --uni-primary: #a855f7;
+    --uni-primary-hover: #9333ea;
+    --uni-bg: rgba(168, 85, 247, 0.15);
+    --uni-border: rgba(168, 85, 247, 0.4);
+    --uni-glow: rgba(168, 85, 247, 0.45);
+}
+
+body.theme-oe {
+    --uni-primary: #3b82f6;
+    --uni-primary-hover: #2563eb;
+    --uni-bg: rgba(59, 130, 246, 0.15);
+    --uni-border: rgba(59, 130, 246, 0.4);
+    --uni-glow: rgba(59, 130, 246, 0.45);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #020408;
+    background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 233, 0.08), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(30, 64, 175, 0.06), transparent 60%);
+    color: #e2e8f0;
+    overflow: hidden;
+}
+
+.code-font {
+    font-family: 'Fira Code', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #020408;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0d1527;
+    border-radius: 3px;
+    border: 1px solid #14203d;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #172547;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.theme-accent-color {
+    color: var(--uni-primary);
+}
+
+.theme-accent-bg {
+    background-color: var(--uni-primary);
+}
+
+.theme-accent-border {
+    border-color: var(--uni-border);
+}
+
+.glow-active {
+    box-shadow: 0 0 15px var(--uni-glow);
+}
+
+.glow-emerald {
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.45);
+}
+
+.glow-blue {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.45);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.04); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.18s ease-out forwards;
+}
+
+.toast-item {
+    animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Voice Room Speaking Ring & Waves */
+@keyframes speakingPulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.speaking-active {
+    border-color: #10b981 !important;
+    animation: speakingPulse 1.6s infinite;
+}
+
+@keyframes soundWave {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+}
+
+.sound-bar {
+    width: 3px;
+    background-color: #10b981;
+    border-radius: 2px;
+    animation: soundWave 0.8s ease-in-out infinite;
+}
+
+.sound-bar:nth-child(1) { animation-delay: 0.1s; }
+.sound-bar:nth-child(2) { animation-delay: 0.3s; }
+.sound-bar:nth-child(3) { animation-delay: 0.2s; }
+.sound-bar:nth-child(4) { animation-delay: 0.4s; }
+
+/* Chat code blocks */
+.chat-code-block {
+    background-color: #040814;
+    border: 1px solid #0e172e;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    font-family: 'Fira Code', monospace;
+}
+
+.chat-code-header {
+    background-color: #081026;
+    padding: 0.25rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    border-bottom: 1px solid #0e172e;
+}
+
+.chat-code-content {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+    background-color: #030610;
+}
+
+/* Kanban Card Styles */
+.kanban-card {
+    background-color: #060c1c;
+    border: 1px solid #0e172e;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+}
+
+.kanban-card:hover {
+    transform: translateY(-2px);
+    border-color: #1d4ed8;
+    box-shadow: 0 4px 16px rgba(2, 6, 23, 0.7), 0 0 10px rgba(29, 78, 216, 0.2);
+}
+
+/* Command Palette Highlight */
+.palette-selected {
+    background-color: #0b1530 !important;
+    border-left: 3px solid var(--uni-primary);
+}
+
+/* Segmented View Switcher in Menubar */
+#btnViewChat, #btnViewRoom {
+    letter-spacing: 0.015em;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
